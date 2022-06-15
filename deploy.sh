@@ -16,6 +16,6 @@ cd dist
 # echo 'www.example.com' > CNAME
 git init
 git add -A
-git commit -m $1
+git commit -m "$1"
 git push -f git@github.com:brandiny/pure_css_smoothed_corners.git master:gh-pages
 cd - 
