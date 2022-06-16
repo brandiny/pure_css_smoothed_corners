@@ -17,10 +17,10 @@
     </div>
 
 
-    <div class="bg-slate-900 w-full p-10 rounded-b-md shadow-md" >
+    <div class="cursor-pointer bg-slate-900 w-full p-10 rounded-b-md shadow-md" >
       <h2 class="tracking-wide text-slate-400 py-1 text-lg">CSS Code</h2>
-      <h4 class="font-mono text-white text-xl overflow-hidden">
-      {{clipPathCSS}}
+      <h4 class="font-mono text-white text-xl overflow-hidden whitespace-nowrap">
+      clip-path: {{clipPathCSS}};
      </h4>
     </div>
     
@@ -48,8 +48,57 @@ export default {
   },
 
   methods: {
+    /**
+     * Given 3 points l1, l2, p.
+     * Where l1 --> l2 form a line.
+     * Find the perpendicular (closest) distance from l1-->l2 to p.
+     */
+    perpDistance(l1, l2, p) {
+      const numerator = Math.abs((l2.x-l1.x)*(l1.y-p.y)-(l2.y-l1.y)*(l1.x-p.x));
+      const denominator = Math.sqrt((l2.x-l1.x)*(l2.x-l1.x) + (l2.y-l1.y)*(l2.y-l1.y));
+      return numerator / denominator;
+    },
+    
+    /**
+     * Ramer-Douglas-Peucker algorithm.
+     * 
+     * This function takes a list of lines (a polyline), and given a threshold,
+     * it will divide and conquer to merge the lines into a lower resolution line.
+     */
     RDP_Optimise(pointlist, epsilon) {
+      if (pointlist.length < 2) { 
+        return pointlist; 
+      }
+
+      // Find the point with the maximum distance between the line from the start-->end
+      const start = pointlist[0]; 
+      const end = pointlist[pointlist.length-1];
+      let dmax = 0;
+      let dmax_index = 0;
+      for (let i=1; i<pointlist.length-1; ++i) {
+        let dist = this.perpDistance(start, end, pointlist[i]);
+        if (dist > dmax) {
+          dmax = dist;
+          dmax_index = i;
+        }
+      }
+
+      // If the maxmimum distance is > epsilon recursively simplify.
+      // as the point must be kept.
+      let result = [];
+      if (dmax > epsilon) {
+        const res1 = this.RDP_Optimise(pointlist.slice(0, dmax_index), epsilon);
+        const res2 = this.RDP_Optimise(pointlist.slice(dmax_index, pointlist.length), epsilon);
+        result = [...res1, ...res2];
+      }   
       
+      // Otherwise, it must be able to removed.
+      else {
+        result.push(start);
+        result.push(end);
+      }
+
+      return result;
     }
   },
 
@@ -63,10 +112,10 @@ export default {
       
       // Important parameters
       const precision = 0.01;
-      const epsilon = 0.25;
+      const epsilon = 0.0001;
       
       // Generate raw points.
-      const all_points_list = [];
+      let all_points_list = [];
       for (let theta=0; theta<=2*Math.PI; theta+=precision) {
         const xp = 0.5 + Math.pow(Math.abs(Math.cos(theta)), 2.0/this.n) * 0.5*Math.sign(Math.cos(theta));
         const yp = 0.5 + Math.pow(Math.abs(Math.sin(theta)), 2.0/this.n) * 0.5*Math.sign(Math.sin(theta));
@@ -76,6 +125,9 @@ export default {
         })
       }
 
+      // Compress
+      all_points_list = this.RDP_Optimise(all_points_list, epsilon);
+      
       // Create the css
       let css_output = "polygon("
       for (let i=0; i<all_points_list.length - 1; ++i) {
@@ -85,7 +137,7 @@ export default {
       
       css_output += (100*(all_points_list[all_points_list.length-1].x) + "% " 
                  + (all_points_list[all_points_list.length-1].y) * 100 + "%" + ")");
-
+      
       return css_output;
     },
 
