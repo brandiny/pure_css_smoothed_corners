@@ -19,9 +19,9 @@
 
     <div class="cursor-pointer bg-slate-900 w-full p-10 rounded-b-md shadow-md" >
       <h2 class="tracking-wide text-slate-400 py-1 text-lg">CSS Code</h2>
-      <h4 class="font-mono text-white text-xl overflow-hidden whitespace-nowrap">
+      <h4 @click="$event.target.select()" class="font-mono text-white text-xl overflow-hidden whitespace-nowrap">
       clip-path: {{clipPathCSS}};
-     </h4>
+      </h4>
     </div>
     
   </div>
