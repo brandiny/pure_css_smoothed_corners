@@ -29,13 +29,13 @@
 
     <div class="relative w-full h-64 my-10 mx-auto rounded-md bg-white shadow-md flex items-stretch">
       <div class="p-5 w-80">
-         <h1 class="text-xl font-bold">Pure CSS Curved Area Graph</h1>
-         <p class="text-sm">Constructed using a poly-cubic-bezier curve, and drawn with polylines in a divide and conquer algorithm.</p>
+         <h1 class="text-lg">Bezier Curve Accuracy: {{graphStep}}</h1>
+         <VueSlider class="mx-2 w-64" dotSize="20" min="0.01" max="1" interval="0.01" v-model="graphStep" />
       </div>
      
       
-      <AreaGraph :min="0" :max="10" :data="data1" />
-      <AreaGraph :min="0" :max="10" :data="data2" />
+      <AreaGraph :min="0" :max="10" :data="data1" :step="graphStep" />
+      <AreaGraph :min="0" :max="10" :data="data2" :step="graphStep"/>
     </div> 
     
   </div>
@@ -62,6 +62,7 @@ export default {
   data () {
     return {
       n: 5,
+      graphStep: 0.01,
       data1: [3, 3, 2, 6, 5.5, 5.5, 0],
       data2: [2, 4, 4, 4, 4.5, 9],
     }
