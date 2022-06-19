@@ -2,7 +2,7 @@
   <div>
     <div class="container my-10 mx-auto rounded-md bg-white shadow-md flex flex-col items-center">
       <div class="px-14 py-8">
-        <h1 class="text-3xl text-slate-900 font-bold tracking-wide">Pure CSS Smoothed Corners Implementation</h1>
+        <h1 class="text-3xl text-slate-900 font-bold tracking-wide">Pure CSS Smoothed Corners</h1>
         <div class="my-12 items-center flex md:flex-row md:gap-x-10 flex-col gap-y-10">
           <Box :style="boxStyles"/>
           <div class="flex flex-col">

@@ -613,11 +613,6 @@ video {
   margin-right: 0.25rem;
 }
 
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-}
-
 .mx-0 {
   margin-left: 0px;
   margin-right: 0px;
@@ -627,40 +622,24 @@ video {
   display: flex;
 }
 
-.h-64 {
-  height: 16rem;
+.h-80 {
+  height: 20rem;
 }
 
 .h-full {
   height: 100%;
 }
 
-.h-80 {
-  height: 20rem;
+.h-64 {
+  height: 16rem;
 }
 
 .w-full {
   width: 100%;
 }
 
-.w-80 {
-  width: 20rem;
-}
-
 .w-64 {
   width: 16rem;
-}
-
-.w-32 {
-  width: 8rem;
-}
-
-.w-10 {
-  width: 2.5rem;
-}
-
-.w-2 {
-  width: 0.5rem;
 }
 
 .cursor-pointer {
@@ -735,18 +714,6 @@ video {
   padding: 2.5rem;
 }
 
-.p-5 {
-  padding: 1.25rem;
-}
-
-.p-8 {
-  padding: 2rem;
-}
-
-.p-12 {
-  padding: 3rem;
-}
-
 .px-14 {
   padding-left: 3.5rem;
   padding-right: 3.5rem;
@@ -765,21 +732,6 @@ video {
 .py-1 {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
-}
-
-.px-12 {
-  padding-left: 3rem;
-  padding-right: 3rem;
-}
-
-.py-6 {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
-
-.px-5 {
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
 }
 
 .font-mono {
