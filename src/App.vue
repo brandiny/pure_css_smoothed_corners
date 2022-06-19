@@ -1,34 +1,51 @@
 <template>
-  <div class="container my-10 mx-auto rounded-md bg-white shadow-md flex flex-col items-center">
-    <div class="px-14 py-8">
-      <h1 class="text-3xl text-slate-900 font-bold tracking-wide">Pure CSS Smoothed Corners Implementation</h1>
-      <div class="my-12 items-center flex md:flex-row md:gap-x-10 flex-col gap-y-10">
-        <Box :style="boxStyles"/>
-        <div class="flex flex-col">
-          <div>
-            <h2 class='text-2xl text-slate-600'>n is 
-              <input min=1 class="focus:border-none focus:outline-none appearance-none" type="number" v-model="n">
-            </h2>
-            <p class="text-md py-2 text-slate-500">n controls how smooth the corners are</p>
-            <VueSlider class="mx-1" min="1" max="10" interval='0.1' v-model="n" />
+  <div>
+    <div class="container my-10 mx-auto rounded-md bg-white shadow-md flex flex-col items-center">
+      <div class="px-14 py-8">
+        <h1 class="text-3xl text-slate-900 font-bold tracking-wide">Pure CSS Smoothed Corners Implementation</h1>
+        <div class="my-12 items-center flex md:flex-row md:gap-x-10 flex-col gap-y-10">
+          <Box :style="boxStyles"/>
+          <div class="flex flex-col">
+            <div>
+              <h2 class='text-2xl text-slate-600'>n is 
+                <input min=1 class="focus:border-none focus:outline-none appearance-none" type="number" v-model="n">
+              </h2>
+              <p class="text-md py-2 text-slate-500">n controls how smooth the corners are</p>
+              <VueSlider class="mx-1" v-model="n" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
 
-    <div class="cursor-pointer bg-slate-900 w-full p-10 rounded-b-md shadow-md" >
-      <h2 class="tracking-wide text-slate-400 py-1 text-lg">CSS Code</h2>
-      <h4 @click="$event.target.select()" class="font-mono text-white text-xl overflow-hidden whitespace-nowrap">
-      clip-path: {{clipPathCSS}};
-      </h4>
+      <div class="cursor-pointer bg-slate-900 w-full p-10 rounded-b-md shadow-md" >
+        <h2 class="tracking-wide text-slate-400 py-1 text-lg">CSS Code</h2>
+        <h4 @click="$event.target.select()" class="font-mono text-white text-xl overflow-hidden whitespace-nowrap">
+        clip-path: {{clipPathCSS}};
+        </h4>
+      </div>
+      
     </div>
+
+    <div class="relative w-full h-64 my-10 mx-auto rounded-md bg-white shadow-md flex items-stretch">
+      <div class="p-5 w-80">
+         <h1 class="text-xl font-bold">Pure CSS Curved Area Graph</h1>
+         <p class="text-sm">Constructed using a poly-cubic-bezier curve, and drawn with polylines in a divide and conquer algorithm.</p>
+      </div>
+     
+      
+      <AreaGraph :data="data1" />
+      <AreaGraph :data="data2" />
+    </div> 
     
   </div>
+
+  
 </template>
 
 <script>
 import Box from './components/Box.vue';
+import AreaGraph from './components/AreaGraph.vue';
 import VueSlider from 'vue-slider-component'
 import VueClipboard from 'vue-clipboard2'
 import 'vue-slider-component/theme/antd.css'
@@ -37,13 +54,16 @@ export default {
   name: "App",
   components: {
     Box,
+    AreaGraph,
     VueSlider,
-    VueClipboard
+    VueClipboard,
   },
 
   data () {
     return {
-      n: 5
+      n: 5,
+      data1: [3, 3, 2, 6, 5.5, 5.5, 0],
+      data2: [2, 4, 4, 4, 4.5, 9],
     }
   },
 
