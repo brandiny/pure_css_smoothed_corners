@@ -34,8 +34,8 @@
       </div>
      
       
-      <AreaGraph :data="data1" />
-      <AreaGraph :data="data2" />
+      <AreaGraph :min="0" :max="10" :data="data1" />
+      <AreaGraph :min="0" :max="10" :data="data2" />
     </div> 
     
   </div>

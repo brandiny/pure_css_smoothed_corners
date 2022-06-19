@@ -5,6 +5,7 @@
 <script>
 import Box from './Box.vue';
 
+/** Represents a two dimensional graphical point, in a inverse-y cartesian plane */
 class Point {
     constructor(x, y) {
         this.x = x;
@@ -16,15 +17,47 @@ export default {
     name: "AreaGraph",
     components: { Box },
     props: {
+        /**
+         * An 1 dimensional array of numbers to graph.
+         */
         data: {
             type: Array,
             required: true
-        }
-    },
+        },
 
-    data() {
-        return {
-        };
+        /**
+         * The Y value of the Y axis
+         * If not provided, it will be calculated from the provided values
+         * such that the min(data) == min
+         */
+        min: {
+            type: Number,
+            required: false
+        },
+
+        /**
+         * The maximum value of the graph.
+         * If not provided, it will be calculated from the provided values
+         * such that the max(data) == max
+         */
+        max: {
+            type: Number,
+            required: false
+        },
+
+        /**
+         * The quality of the bezier lines -- this controls how close each 
+         * line segment is on the curve. Therefore a lower number == smooth curve
+         * 
+         * Range: [0, 1]
+         * Warning: Extremely low values will cause significant performance hits.
+         * Warning: Values out of bounds will cause undefined behaviour
+         */
+        step: {
+            type: Number,
+            required: false,
+            default: 0.01
+        }
     },
 
     computed: {
@@ -33,25 +66,32 @@ export default {
          * return --> Array:Point 
          */
         dataScaled() {
-            // Change these eventually to be props.
-            const data_mimic = [...this.data, 0];
-            const min = 0;
-            const max = 10;
+            // Append an extra point onto the end of the data, 
+            // as the bezier tracing algorithm fails to curve on the final point,
+            // so an extra point will mitigate this issue... eventually fix.
+            const dataMimic = [...this.data, 0];
+            // Calculate min if not provided.
+            const min = this.min ? this.min : Math.min(...dataMimic);
+            // Calculate max if not provided.
+            const max = this.max ? this.max : Math.max(...dataMimic);
+            // The range is the number of Y units between min and max
             const range = max - min;
-            const xstep = 120 / (data_mimic.length - 1);
+            // The width of each point in the X axis.
+            // 120% is used such that the fake final point exists the graph
+            const xstep = 120 / (dataMimic.length - 1);
+            // Notice, all x and y values are percentages.
             const ans = []
-            for (let i=0; i<data_mimic.length; ++i) {
+            for (let i=0; i<dataMimic.length; ++i) {
                 ans.push(new Point(
-                    i * xstep,
-                    100 - data_mimic[i] / range * 100
+                    i * xstep, // The X coordinate of the point.
+                    100 - dataMimic[i] / range * 100 // 100 - Y_VALUE due to inverse Y system.
                 ));
             }
-
             return ans;
         },
 
         /**
-         * Clip path for the box.
+         * CSS Object for the graph.
          */
         areaGraphStyles() {
             return {
@@ -60,14 +100,16 @@ export default {
         },
 
         /**
-         * Clip path calculation.
+         * Construct the polygon clip path string from a sequence of points,
+         * representing a polyline.
          */
         clipPathCSS() {
+            // Initial points are the points of the bottom-right, and bottom-left
+            // respectively, which seal the graph bottom.
             let points = [new Point(100, 100), new Point(0, 100)];
+            // Calculate the curve from the scaled data.
             let curve = this.getCurve(this.dataScaled);
-
             points = [...points, ...curve];
-
             let css_output = "polygon("
             for (let i=0; i<points.length; ++i) {
                 css_output += `${points[i].x}% ${points[i].y}%`
@@ -75,8 +117,6 @@ export default {
                     css_output += ", ";
                 }
             } css_output += ")";
-
-            
             return css_output;
         }
     },
@@ -90,11 +130,9 @@ export default {
          * @param {Point} p3 
          */
         bezier(p0, p1, p2, p3) {
-            const step = 0.01; // IMPORTANT: CONTROLS RESOLUTION OF THE GRAPH
             const polyline = []
-
             let lastPoint = p0;
-            for (let t=step; t<=1; t+=step) {
+            for (let t=this.step; t<=1; t+=this.step) {
                 const c0x = Math.pow((1-t), 3)*p0.x;
                 const c0y = Math.pow((1-t), 3)*p0.y;
                 const c1x = 3*t*Math.pow((1-t), 2)*p1.x;
@@ -109,7 +147,6 @@ export default {
                 polyline.push(lastPoint);
                 lastPoint = currentPoint;
             } polyline.push(lastPoint);
-
             return polyline;
         },
 
@@ -117,21 +154,20 @@ export default {
         /**
          * Returns a polyline curve of the points list where the curve passes
          * through every single point on the curve.
-         * @param {List:Point} points_list 
+         * @param {List:Point} pointsList 
          */
-        getCurve(points_list) {
+        getCurve(pointsList) {
             const rhsArray  = [];
             const a = [];
             const b = [];
             const c = [];
 
             // Generate linear equations
-            for (let i=0; i<points_list.length-1; ++i) {
+            for (let i=0; i<pointsList.length-1; ++i) {
                 let rhsValueX = 0;
                 let rhsValueY = 0;
-
-                let p0 = points_list[i];
-                let p3 = points_list[i+1];
+                let p0 = pointsList[i];
+                let p3 = pointsList[i+1];
 
                 if (i == 0) {
                     a.push(0.0);
@@ -139,7 +175,7 @@ export default {
                     c.push(1.0);
                     rhsValueX = p0.x + 2*p3.x;
                     rhsValueY = p0.y + 2*p3.y;
-                } else if (i == points_list.length - 2) {
+                } else if (i == pointsList.length - 2) {
                     a.push(2.0);
                     b.push(7.0);
                     c.push(0.0);
@@ -187,13 +223,13 @@ export default {
             const secondControlPoints = [];
             for (let i=0; i<rhsArray.length; ++i) {
                 if (i == rhsArray.length-1) {
-                    let P3 = points_list[i];
+                    let P3 = pointsList[i];
                     let P1 = firstControlPoints[i];
                     let controlPointX = (P3.x+P1.x)/2;
                     let controlPointY = (P3.y+P1.y)/2;
                     secondControlPoints.push(new Point(controlPointX, controlPointY));
                 } else {
-                    let P3 = points_list[i+1];
+                    let P3 = pointsList[i+1];
                     let nextP1 = firstControlPoints[i+1];
                     let controlPointX = 2*P3.x-nextP1.x;
                     let controlPointY = 2*P3.y-nextP1.y;
@@ -203,27 +239,18 @@ export default {
 
             // Construct the bezier curves.
             let ans = [];
-            for (let i=0; i<points_list.length-1; ++i) {
-                let p0 = points_list[i];
+            for (let i=0; i<pointsList.length-1; ++i) {
+                let p0 = pointsList[i];
                 let p1 = firstControlPoints[i];
                 let p2 = secondControlPoints[i];
-                let p3 = points_list[i+1];
+                let p3 = pointsList[i+1];
                 let subcurve = this.bezier(p0, p1, p2, p3);
                 for (let i=0; i<subcurve.length; ++i) {
                     ans.push(subcurve[i]);
                 }
             }
-
             return ans;
         }
     },
-
-    created() {
-
-    }
 }
 </script>
-
-<style>
-
-</style>
